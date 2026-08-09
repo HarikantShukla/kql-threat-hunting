@@ -1,4 +1,4 @@
-# Brute Force Authentication Detection
+# Brute-force activity followed by successful authentication
 ## MITRE ATT&CK
 **Technique:** T1110 — Brute Force
 
