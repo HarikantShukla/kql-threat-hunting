@@ -26,3 +26,5 @@ kql-threat-hunting/
 ├── credential-access/
 ├── lateral-movement/
 └── execution/
+
+All queries are designed for defensive security research, threat hunting, and educational purposes using authorized environments.
