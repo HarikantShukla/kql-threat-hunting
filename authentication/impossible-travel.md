@@ -64,11 +64,9 @@ SigninLogs
         Longitude,
         Latitude
     ) / 1000.0
-| extend
-    TravelHours = datetime_diff('minute', TimeGenerated, PrevTime) / 60.0
+| extend TravelHours = datetime_diff('minute', TimeGenerated, PrevTime) / 60.0
 | where TravelHours > 0
-| extend
-    SpeedKmH = DistanceKm / TravelHours
+| extend SpeedKmH = DistanceKm / TravelHours
 | where SpeedKmH > speedthresholdkmh
 | summarize arg_max(SpeedKmH, *) by UserPrincipalName
 | project
