@@ -25,12 +25,14 @@ The query:
 
 ```kql
 let Baseline = 30d;
+
 let KnownCountries =
 SigninLogs
 | where TimeGenerated between (ago(Baseline) .. ago(1d))
 | where ResultType == 0
 | extend Country = tostring(LocationDetails.countryOrRegion)
 | distinct UserPrincipalName, Country;
+
 SigninLogs
 | where TimeGenerated > ago(1d)
 | where ResultType == 0
@@ -45,6 +47,7 @@ SigninLogs
     IPAddress,
     RiskLevelAggregated,
     AppDisplayName
+```
 
 ## False Positives
 
