@@ -90,6 +90,3 @@ Potential Password Spray
 * **T1110 — Brute Force**
 * **T1110.003 — Password Spraying**
 * **T1078 — Valid Accounts**
-
-```
-```
