@@ -20,17 +20,17 @@ let FailedLogins =
 SigninLogs
 | where TimeGenerated >= ago(24h)
 | where ResultType != 0
-| Summarize FailedAttempts =count(),
+| summarize FailedAttempts = count(),
             LastFailure = max(TimeGenerated)
-    by UserprincipalName, IPAddress
+    by UserPrincipalName, IPAddress
 | where FailedAttempts >= FailureThreshold;
 let SuccessfulLogins = 
 SigninLogs
 | where TimeGenerated >= ago(24h)
 | where ResultType == 0
-| project UserPrincipalName, IPAddress, SuccessTime=TimeGenerated;
+| project UserPrincipalName, IPAddress, SuccessTime = TimeGenerated;
 FailedLogins
-| join kind=inner SuccessFulLogins on UserPrincipalName, IPAddress
+| join kind=inner SuccessfulLogins on UserPrincipalName, IPAddress
 | where SuccessTime between (LastFailure .. LastFailure + TimeWindow)
 | project SuccessTime, UserPrincipalName, IPAddress, FailedAttempts, LastFailure
 | order by FailedAttempts desc
