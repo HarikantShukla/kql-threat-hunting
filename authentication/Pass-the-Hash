@@ -1,0 +1,116 @@
+# NTLM Lateral Movement Detection
+
+## MITRE ATT&CK
+**Technique:** T1550.002 — Use Alternate Authentication Material: Pass the Hash
+
+## Objective
+Detect potential lateral movement by identifying NTLM network authentication from the same source IP to multiple target hosts using a non-machine account.
+
+## Data Source
+- Microsoft Sentinel
+- `SecurityEvent`
+
+## Detection Logic
+The query:
+
+1. Searches for successful Windows logons using **Event ID 4624**.
+2. Filters for **Logon Type 3**, representing network authentication.
+3. Identifies authentication using the **NTLM** authentication package.
+4. Excludes machine accounts ending with `$`.
+5. Excludes local loopback addresses.
+6. Groups activity by **account and source IP**.
+7. Counts the number of distinct target hosts accessed.
+8. Flags activity where the same account and source IP access **3 or more hosts**.
+9. Returns the affected hosts and authentication time range for investigation.
+
+## KQL
+
+```kql
+SecurityEvent
+| where EventID == 4624
+| where LogonType == 3
+| where AuthenticationPackageName == "NTLM"
+| where Account !endswith "$"
+| where IpAddress !in ("127.0.0.1", "::1", "-")
+| summarize
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    TargetHosts = dcount(Computer),
+    Hosts = make_set(Computer, 50)
+    by Account, IpAddress
+| where TargetHosts >= 3
+| project
+    FirstSeen,
+    LastSeen,
+    Account,
+    IpAddress,
+    TargetHosts,
+    Hosts
+| order by TargetHosts desc
+```
+
+## Detection Flow
+
+```text
+Successful Windows Logon
+        ↓
+Logon Type 3
+        ↓
+NTLM Authentication
+        ↓
+Non-Machine Account
+        ↓
+Same Source IP
+        ↓
+Multiple Target Hosts
+        ↓
+3+ Hosts
+        ↓
+Potential Lateral Movement
+```
+
+## Example
+An account authenticates using NTLM from the same source IP:
+
+```text
+Source IP: 10.10.10.25
+Account: adminuser
+```
+
+The account successfully accesses:
+```text
+SERVER01
+SERVER02
+SERVER03
+SERVER04
+```
+
+Because the same account and source IP accessed multiple hosts using NTLM, the activity is flagged for investigation.
+
+## False Positives
+
+- Legacy applications using NTLM
+- Administrative activity
+- File server access
+- Approved management tools
+- Service accounts
+- Applications that require NTLM authentication
+- Older systems that do not support Kerberos
+
+## Tuning
+
+- Establish a baseline of legitimate NTLM usage.
+- Exclude known legacy applications where appropriate.
+- Exclude approved administrative infrastructure.
+- Monitor privileged accounts more closely.
+- Tune the target-host threshold based on the environment.
+- Correlate with source device and process activity.
+- Correlate with suspicious tools such as PsExec, WMI, or remote service execution.
+- Consider whether Kerberos was expected for the authentication scenario.
+
+## Related Techniques
+
+- **T1550 — Use Alternate Authentication Material**
+- **T1550.002 — Use Alternate Authentication Material: Pass the Hash**
+- **T1021 — Remote Services**
+- **T1078 — Valid Accounts**
