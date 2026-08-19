@@ -1,4 +1,4 @@
-# NTLM Lateral Movement Detection
+# Pass-the-Hash/ NTLM Lateral Movement Detection
 
 ## MITRE ATT&CK
 **Technique:** T1550.002 — Use Alternate Authentication Material: Pass the Hash
