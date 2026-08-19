@@ -38,6 +38,7 @@ DeviceLogonEvents
     by AccountName, RemoteIP, bin(TimeGenerated, 1h)
 | where TargetDevices >= 5
 | order by TargetDevices desc
+```
 
 ## Detection Flow
 ```text
