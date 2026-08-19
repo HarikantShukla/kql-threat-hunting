@@ -29,17 +29,10 @@ The query:
 let TGTRequests =
 SecurityEvent
 | where EventID == 4768
-| project
-    TargetUserName,
-    IpAddress,
-    TGT_Time = TimeGenerated;
+| project TargetUserName, IpAddress, TGT_Time = TimeGenerated;
 SecurityEvent
 | where EventID == 4769
-| project
-    TimeGenerated,
-    TargetUserName,
-    IpAddress,
-    ServiceName
+| project TimeGenerated, TargetUserName, IpAddress, ServiceName
 | join kind=leftanti (
     TGTRequests
 ) on TargetUserName, IpAddress
